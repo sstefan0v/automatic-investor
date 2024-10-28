@@ -9,7 +9,7 @@ import java.util.concurrent.Executor;
 public class ThreadPoolConfig {
 
     @Bean(name = "investTaskExecutor")
-    public Executor productThreadPoolTaskExecutor() {
+    public Executor getThreadPoolTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(30);
         executor.setMaxPoolSize(35);

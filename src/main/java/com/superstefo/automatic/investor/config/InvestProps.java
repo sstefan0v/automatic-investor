@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.math.BigDecimal;
 import java.lang.reflect.Field;
+import java.util.List;
+
 @ConfigurationProperties(prefix = "app")
 @Data
 @Slf4j
@@ -26,6 +28,7 @@ public class InvestProps {
     private final BigDecimal howMuchMoneyToInvest;
     private final int lowInvestorBalanceWaitingDuration;
     private final int tooManyRequestsWaitingDuration;
+    private final int waitBetweenInvestingInShortTermLoans;
 
     public String getLoansUrl() {
         return "v1/" + publicId +
@@ -44,40 +47,45 @@ public class InvestProps {
     public static final String OVERVIEW_URL = "v1/investor/overview";
     public static final BigDecimal MINIMUM_INVESTMENT = BigDecimal.valueOf(10);
 
-    public  void printAllFields() {
-
-        Class<?> clazz = this.getClass();
-
-
-        Field[] fields = clazz.getDeclaredFields();
-
-
+    public void printAllFields() {
+        Field[] fields = this.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
             try {
-                log.info("{} = {}", field.getName(), field.get(this));
+                if (isToLogField(field))
+                    log.info("{} = {}", field.getName(), field.get(this));
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             } finally {
                 field.setAccessible(false);
             }
         }
     }
-    @PostConstruct
-    private void onceAtStartLog() {
-        log.info("\n =================== Search for loans by criteria: =================== " +
-                "\n      Sort               = -term" +
-//                    "\n      Page Size          = " + props.getPageSize() +
-//                    "\n      Max Remaining Term = " + props.getMaxRemainingTerm() +
-//                    "\n      Min Remaining Term = " + props.getMinRemainingTerm() +
-//                    "\n      Min Interest Rate  = " + props.getMinInterestRate() +
-//                    "\n      Page Offset        = " + props.getPageOffset() +
-//                    "\n      Hide Invested      = true" +
-//                    "\n      Group Guarantee    = true" +
-//                    "\n      Max Investment     = " + props.getHowMuchMoneyToInvest() +
-//                    "\n      Investor ID        = " + props.getInvestorPublicId() +
-                "\n ====================================================================== ");
 
-        printAllFields();
+    private boolean isToLogField(Field field) {
+        return !excludedFields.contains(field.getName());
+
     }
+
+    @PostConstruct
+    private void logOnceAtStart() {
+        assertPrintExcludedFieldsArePresent();
+        log.info("================================ Settings: ===================================");
+        printAllFields();
+        log.info("==============================================================================");
+    }
+
+    private List<String> excludedFields = List.of("excludedFields", "password", "log");
+
+    private void assertPrintExcludedFieldsArePresent() {
+
+        excludedFields.forEach(field -> {
+            try {
+                this.getClass().getDeclaredField(field);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException("The class does not have searched field:", e);
+            }
+        });
+    }
+
 }

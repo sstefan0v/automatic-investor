@@ -23,12 +23,12 @@ import static org.springframework.http.HttpMethod.POST;
 
 @Service
 @Slf4j
-public final class InvestingRestAPIService extends restAPIConnector {
+public final class RestAPIService extends RestAPIConnector {
 
     private final InvestProps investProps;
     private final MultiValueMap<String, String> investingUserAuthHeaders;
 
-    InvestingRestAPIService(InvestProps investProps) {
+    RestAPIService(InvestProps investProps) {
         super(investProps);
         this.investProps = investProps;
         confirmHostReachable();
@@ -37,6 +37,10 @@ public final class InvestingRestAPIService extends restAPIConnector {
     }
 
     public StateTypes doInvest(BigDecimal amount, Loan loan) {
+        if (amount.compareTo(InvestProps.MINIMUM_INVESTMENT) < 0) {
+            log.info("Will not invest due to low investment amount={} EUR invested for loan={};", amount, loan.getLoanId());
+            return StateTypes.NA;//do not return StateTypes.LOW_BALANCE as it is not certain
+        }
         log.info("Investing in loanId={}; availableToInvest={}, myAmount={}",
                 loan.getLoanId(), loan.getAvailableToInvest(), amount);
 

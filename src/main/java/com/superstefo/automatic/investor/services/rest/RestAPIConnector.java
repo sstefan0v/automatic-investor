@@ -19,12 +19,12 @@ import static org.springframework.http.HttpMethod.POST;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public abstract class restAPIConnector {
+public abstract class RestAPIConnector {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final InvestProps investProps;
 
-    <R,T> R exchange(String url, HttpMethod method, HttpEntity<T> httpEntity, Class<R> clazz) {
+    public <R,T> R exchange(String url, HttpMethod method, HttpEntity<T> httpEntity, Class<R> clazz) {
         url = investProps.getBaseUrl() + url;
         log.debug("Preparing request url={}, body={}", url, httpEntity.getBody());
         try {

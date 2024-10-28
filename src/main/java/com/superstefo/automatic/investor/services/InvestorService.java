@@ -3,7 +3,7 @@ package com.superstefo.automatic.investor.services;
 import com.superstefo.automatic.investor.config.InvestProps;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.AllLoans;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.Loan;
-import com.superstefo.automatic.investor.services.rest.InvestingRestAPIService;
+import com.superstefo.automatic.investor.services.rest.RestAPIService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,14 +29,14 @@ public class InvestorService {
     private final JobScheduler jobScheduler;
     private final WalletService wallet;
 
-    private InvestingRestAPIService investingRestAPIService;
+    private RestAPIService restAPIService;
 
     private Map<Integer, Loan> triedLoans = new HashMap<>();
 
 
     @Autowired
-    public void setInvestingRestAPIService(InvestingRestAPIService investingRestAPIService) {
-        this.investingRestAPIService = investingRestAPIService;
+    public void setInvestingRestAPIService(RestAPIService restAPIService) {
+        this.restAPIService = restAPIService;
     }
 
     @Autowired
@@ -47,19 +47,22 @@ public class InvestorService {
         this.jobScheduler = jobScheduler;
         this.wallet = wallet;
 
-        jobScheduler.setRunProcedure(findLoansProcedure());
+        jobScheduler.setRunProcedure(lowInvestorBalanceProcedure());
     }
 
     private Consumer<Void> findLoansProcedure() {
-        return (_) -> investInLoans(investingRestAPIService.getAvailableLoans());
+        return (_) -> {
+            if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) < 0) {
+                jobScheduler.setRunProcedure(lowInvestorBalanceProcedure());
+            }
+            investInLoans(restAPIService.getAvailableLoans());
+        };
     }
 
     private Consumer<Void> lowInvestorBalanceProcedure() {
         return (_) -> {
-            BigDecimal availableMoney = getInvestorsFreeMoneyFromServer();
-            wallet.setInvestorsFreeMoney(availableMoney);
-            if (availableMoney.compareTo(MINIMUM_INVESTMENT) >= 0) {
-
+            wallet.updateInvestorsFreeMoneyFromServer();
+            if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) >= 0) {
                 jobScheduler.setRunProcedure(findLoansProcedure());
             } else {
                 jobScheduler.postpone(investProps.getLowInvestorBalanceWaitingDuration(), LOW_BALANCE);
@@ -103,21 +106,18 @@ public class InvestorService {
 
             try {
                 if (loan.getTermType().equalsIgnoreCase("short")) {
-                    log.info("Waiting as loan is short term.");
-                    Thread.sleep(300);
+                    log.debug("Waiting as loan is short term.");
+                    Thread.sleep(investProps.getWaitBetweenInvestingInShortTermLoans());
                 }
-
             } catch (InterruptedException e) {
-
-                log.error(" errr ");
-
+                log.error("Error while waiting for loan investment. ", e);
             }
         };
     }
 
     private void invest(BigDecimal amountToInvest, Loan loan) {
         CompletableFuture
-                .supplyAsync(() -> investingRestAPIService.doInvest(amountToInvest, loan), executor)
+                .supplyAsync(() -> restAPIService.doInvest(amountToInvest, loan), executor)
                 .thenAccept(workBasedOnResult(amountToInvest, loan));
     }
 
@@ -133,18 +133,11 @@ public class InvestorService {
                     triedLoans.put(loan.getLoanId(), loan);
                     log.debug("Loan will be skipped next time, loanId={}", loan.getLoanId());
                 }
-                case LOW_BALANCE -> CompletableFuture
-                        .supplyAsync(this::getInvestorsFreeMoneyFromServer, executor)
-                        .thenAccept(wallet::setInvestorsFreeMoney);
+                case LOW_BALANCE -> wallet.updateInvestorsFreeMoneyFromServer();
+
                 case TOO_MANY_REQUESTS -> jobScheduler.setRunProcedure(tooManyRequestsProcedure());
-                default -> log.error(" unhandled state: {}", state);
+                default -> log.warn("Unhandled stateType: {}", state);
             }
         };
-    }
-
-    private BigDecimal getInvestorsFreeMoneyFromServer() {
-        BigDecimal money = investingRestAPIService.getMainInfo().getAvailableMoney();
-        log.info("Available investor's free money: {}", money);
-        return money;
     }
 }

@@ -20,14 +20,13 @@ public class JobScheduler {
     private volatile long futureInstant = 0;
     private Consumer<Void > consumer;
     private final LocalTime start = LocalTime.of(8, 30);
-    private final LocalTime end = LocalTime.of(23, 0);
-
+    private final LocalTime end = LocalTime.of(11, 0);
 
     public void setRunProcedure(Consumer<Void> consumer) {
         this.consumer =  consumer;
     }
 
-    @Scheduled(initialDelay =  100,  fixedRateString = "${app.pollFrequency}")
+    @Scheduled(initialDelay = 100, fixedRateString = "${app.pollFrequency}")
     public void start() {
         if (isToWaitMore()) {
             log.info("Waiting due to {}", state.info);
