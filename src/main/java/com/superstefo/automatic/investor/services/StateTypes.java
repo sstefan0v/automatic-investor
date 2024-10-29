@@ -6,9 +6,9 @@ public enum StateTypes {
     NA(0, "N/A"),
     OK(200, "OK"),
     LOW_BALANCE(4001, "Low investor balance"),
-    LOAN_TOO_SMALL(4002, "The loan available amount is less than"),
+    LOAN_LESS_THAN_MIN(4002, "The loan available amount is less than"),
     FREQUENT_REQUESTS(4003, "Request is too frequent,"),
-    LESS_THAN_MIN(4004, "The minimal amount is 10"),
+    INVESTMENT_LESS_THAN_MIN(4004, "The minimal amount is 10"),
     LOAN_SOLD(4005, "The loan is sold out"),
     TOO_MANY_REQUESTS(429, "Too many requests"),
     SERVER_ERROR(500, "server error....");
