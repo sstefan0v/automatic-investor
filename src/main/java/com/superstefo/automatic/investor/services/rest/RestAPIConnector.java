@@ -42,7 +42,7 @@ public abstract class RestAPIConnector {
             ResponseEntity<LoginResponse> loginResponse = restTemplate.exchange(
                     url,
                     POST,
-                    new HttpEntity<>(getLoginBody(email, password), getLoginHeaders()),
+                    new HttpEntity<>(getLoginBody(email, password), getLoginHeaders(investProps)),
                     LoginResponse.class);
             return Objects.requireNonNull(loginResponse.getBody()).getAccess_token();
         } catch (RuntimeException e) {
@@ -57,7 +57,7 @@ public abstract class RestAPIConnector {
             restTemplate.exchange(
                     investProps.getBaseUrl(),
                     GET,
-                    new HttpEntity<>(null, getLoginHeaders()),
+                    new HttpEntity<>(null, getLoginHeaders(investProps)),
                     String.class);
 
         } catch (RuntimeException e) {

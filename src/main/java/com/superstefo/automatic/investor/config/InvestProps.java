@@ -46,8 +46,9 @@ public class InvestProps {
     public static final String LOANS_URL = "v1/loans/";
     public static final String OVERVIEW_URL = "v1/investor/overview";
     public static final BigDecimal MINIMUM_INVESTMENT = BigDecimal.valueOf(10);
+    private List<String> excludedFields = List.of("excludedFields", "password", "log");
 
-    public void printAllFields() {
+    private void printAllFields() {
         Field[] fields = this.getClass().getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
@@ -64,28 +65,12 @@ public class InvestProps {
 
     private boolean isToLogField(Field field) {
         return !excludedFields.contains(field.getName());
-
     }
 
     @PostConstruct
     private void logOnceAtStart() {
-        assertPrintExcludedFieldsArePresent();
         log.info("================================ Settings: ===================================");
         printAllFields();
         log.info("==============================================================================");
     }
-
-    private List<String> excludedFields = List.of("excludedFields", "password", "log");
-
-    private void assertPrintExcludedFieldsArePresent() {
-
-        excludedFields.forEach(field -> {
-            try {
-                this.getClass().getDeclaredField(field);
-            } catch (NoSuchFieldException e) {
-                throw new RuntimeException("The class does not have searched field:", e);
-            }
-        });
-    }
-
 }

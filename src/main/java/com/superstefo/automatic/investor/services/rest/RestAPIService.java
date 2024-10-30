@@ -33,7 +33,7 @@ public final class RestAPIService extends RestAPIConnector {
         this.investProps = investProps;
         confirmHostReachable();
         String authToken = this.getAuthTokenFromEndpoint(investProps.getEmail(), investProps.getPassword());
-        this.investingUserAuthHeaders = getAuthHeaders("Bearer " + authToken);
+        this.investingUserAuthHeaders = getAuthHeaders(investProps, "Bearer " + authToken);
     }
 
     public StateTypes doInvest(BigDecimal amount, Loan loan) {

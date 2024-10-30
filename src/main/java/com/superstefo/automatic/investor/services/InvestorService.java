@@ -28,26 +28,20 @@ public class InvestorService {
     private final Executor executor;
     private final JobScheduler jobScheduler;
     private final WalletService wallet;
+    private final RestAPIService restAPIService;
 
-    private RestAPIService restAPIService;
-
-    private Map<Integer, Loan> triedLoans = new HashMap<>();
-
-
-    @Autowired
-    public void setInvestingRestAPIService(RestAPIService restAPIService) {
-        this.restAPIService = restAPIService;
-    }
+    private final Map<Integer, Loan> triedLoans = new HashMap<>();
 
     @Autowired
     public InvestorService(InvestProps investProps, @Qualifier("investTaskExecutor") Executor executor,
-                           JobScheduler jobScheduler, WalletService wallet) {
+                           JobScheduler jobScheduler, WalletService wallet, RestAPIService restAPIService) {
         this.investProps = investProps;
         this.executor = executor;
         this.jobScheduler = jobScheduler;
         this.wallet = wallet;
+        this.restAPIService = restAPIService;
 
-        jobScheduler.setRunProcedure(findLoansProcedure());
+        jobScheduler.setRunProcedure(lowInvestorBalanceProcedure());
     }
 
     private Consumer<Void> findLoansProcedure() {

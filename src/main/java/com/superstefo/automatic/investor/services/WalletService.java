@@ -28,20 +28,20 @@ public class WalletService {
         this.investProps = investProps;
         this.restAPIService = restAPIService;
         this.executor = executor;
-        setInvestorsFreeMoney(BigDecimal.TEN);
+        setInvestorsFreeMoney(BigDecimal.ZERO);
     }
 
     public BigDecimal approveLoanMoney(BigDecimal availableInLoanForInvesting) {
         lock.lock();
         try {
-            BigDecimal approvedMoney = availableInLoanForInvesting.min( investProps.getHowMuchMoneyToInvest());
+            BigDecimal approvedMoney = availableInLoanForInvesting.min(investProps.getHowMuchMoneyToInvest());
 
             approvedMoney = approvedMoney.min(investorsFreeMoney);
 
-            if (availableInLoanForInvesting.subtract(approvedMoney).compareTo(MINIMUM_INVESTMENT)  < 0 && availableInLoanForInvesting.compareTo(approvedMoney) != 0 ){
+            if (availableInLoanForInvesting.subtract(approvedMoney).compareTo(MINIMUM_INVESTMENT) < 0 && availableInLoanForInvesting.compareTo(approvedMoney) != 0) {
                 approvedMoney = availableInLoanForInvesting.subtract(MINIMUM_INVESTMENT);
             }
-            if (approvedMoney.compareTo(MINIMUM_INVESTMENT) <  0) {
+            if (approvedMoney.compareTo(MINIMUM_INVESTMENT) < 0) {
                 return BigDecimal.ZERO;
             }
 
@@ -52,12 +52,7 @@ public class WalletService {
     }
 
     public void pull(BigDecimal freeMoney) {
-        lock.lock();
-        try {
-            investorsFreeMoney = investorsFreeMoney.subtract(freeMoney);
-        } finally {
-            lock.unlock();
-        }
+        setInvestorsFreeMoney(investorsFreeMoney.subtract(freeMoney));
     }
 
     public void setInvestorsFreeMoney(BigDecimal freeMoney) {
@@ -83,7 +78,7 @@ public class WalletService {
         CompletableFuture
                 .supplyAsync(restAPIService::getMainInfo, executor)
                 .thenAccept((mainInfo) -> {
-                    BigDecimal investorsFreeMoney  = mainInfo.getAvailableMoney();
+                    BigDecimal investorsFreeMoney = mainInfo.getAvailableMoney();
                     setInvestorsFreeMoney(investorsFreeMoney);
                 });
     }

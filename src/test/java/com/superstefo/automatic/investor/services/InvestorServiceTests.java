@@ -53,7 +53,7 @@ class InvestorServiceTests {
 
     //@Test
     void willInvestInALoanSuccessfully() {
-        investorService.setInvestingRestAPIService(restAPIServiceMock);
+     //   investorService.setInvestingRestAPIService(restAPIServiceMock);
         when(restAPIConnectorMock.exchange(null, GET, new HttpEntity<>(""), MainInfo.class)).thenReturn(getMainInfo(500));
         when(restAPIConnectorMock.exchange(null, GET, new HttpEntity<>(""), AllLoans.class)).thenReturn(getAllLoans(newLoan()));
         when(walletService.approveLoanMoney(BigDecimal.valueOf(23d))).thenReturn(BigDecimal.valueOf(23d));
