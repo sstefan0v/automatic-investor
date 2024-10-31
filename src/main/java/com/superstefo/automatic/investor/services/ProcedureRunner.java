@@ -35,12 +35,12 @@ public class ProcedureRunner {
 
     @PostConstruct
     public void init() {
-        startHour = LocalTime.parse(props.getWorkCyclesStartHour());
-        finishHour = LocalTime.parse(props.getWorkCyclesFinishHour());
+        startHour = props.getWorkCyclesStartHour();
+        finishHour = props.getWorkCyclesFinishHour();
         setWhatToRunNext(startingProcedure);
     }
 
-    @Scheduled(initialDelay = 100, fixedRateString = "${app.pollFrequency}")
+    @Scheduled(initialDelay = 100, fixedRateString = "${pollFrequency}")
     public void run() {
         if (isToWaitMore()) {
             log.debug("Waiting due to {}", state.info);
