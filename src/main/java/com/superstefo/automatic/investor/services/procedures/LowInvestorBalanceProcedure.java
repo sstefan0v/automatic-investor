@@ -28,7 +28,6 @@ public class LowInvestorBalanceProcedure implements Startable {
         if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) >= 0) {
             procedureRunner.nextRunFindLoansProcedure();
         } else {
-            log.info("Waiting due to Low investor balance={}", wallet.getInvestorsFreeMoney());
             procedureRunner.postpone(investProps.getLowInvestorBalanceWaitingDuration(), LOW_BALANCE);
         }
     }

@@ -113,7 +113,7 @@ public final class RestAPIService extends RestAPIConnector {
                 HttpMethod.GET,
                 new HttpEntity<>("", this.investingUserAuthHeaders),
                 AllLoans.class);
-        log.info("Found loans: {}", allLoans.getData() != null ? allLoans.getData().size() : allLoans.getTotal());
+        log.debug("Found loans: {}", allLoans.getData() != null ? allLoans.getData().size() : allLoans.getTotal());
         return allLoans;
     }
 }

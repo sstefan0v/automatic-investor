@@ -26,6 +26,8 @@ public class InvestProps {
     private final int lowInvestorBalanceWaitingDuration;
     private final int tooManyRequestsWaitingDuration;
     private final int waitBetweenInvestingInShortTermLoans;
+    private final String workCyclesStartHour;
+    private final String workCyclesFinishHour;
 
     public String getLoansUrl() {
         return "v1/" + publicId +

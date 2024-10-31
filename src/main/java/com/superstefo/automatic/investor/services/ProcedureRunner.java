@@ -1,5 +1,6 @@
 package com.superstefo.automatic.investor.services;
 
+import com.superstefo.automatic.investor.config.InvestProps;
 import com.superstefo.automatic.investor.services.procedures.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +24,19 @@ public class ProcedureRunner {
     private final LowInvestorBalanceProcedure lowInvestorBalanceProcedure;
     private final FindLoansProcedure findLoansProcedure;
     private final StartingProcedure startingProcedure;
+    private final InvestProps props;
 
     private StateTypes state = StateTypes.OK;
     private volatile long futureInstant = 0;
 
     private Startable whatToRunNext;
-    private final LocalTime start = LocalTime.parse("08:30");
-    private final LocalTime end = LocalTime.parse("23:15");
+    private LocalTime startHour;
+    private LocalTime finishHour;
 
     @PostConstruct
     public void init() {
+        startHour = LocalTime.parse(props.getWorkCyclesStartHour());
+        finishHour = LocalTime.parse(props.getWorkCyclesFinishHour());
         setWhatToRunNext(startingProcedure);
     }
 
@@ -45,7 +49,7 @@ public class ProcedureRunner {
 
         LocalTime now = LocalTime.now();
 
-        if (now.isBefore(start) || now.isAfter(end)) {
+        if (now.isBefore(startHour) || now.isAfter(finishHour)) {
             log.debug("Skipping run, since it is outside of work hours ");
             return;
         }
@@ -66,7 +70,7 @@ public class ProcedureRunner {
         try {
             futureInstant = System.currentTimeMillis() + (seconds * 1000L);
             this.state = state;
-            log.debug("Postponing {} seconds due to {}", seconds, state);
+            log.debug("Postponing next run for {} seconds due to {}", seconds, state);
         } finally {
             lock.unlock();
         }
@@ -85,7 +89,7 @@ public class ProcedureRunner {
     }
 
     private void setWhatToRunNext(Startable whatToRunNext) {
-        log.debug("Next Procedure: {}", whatToRunNext.getClass().getSimpleName());
+        log.info("Next Procedure to run: {}", whatToRunNext.getClass().getSimpleName());
         this.whatToRunNext = whatToRunNext;
     }
 }
