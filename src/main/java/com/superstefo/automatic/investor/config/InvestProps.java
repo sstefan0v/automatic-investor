@@ -1,6 +1,5 @@
 package com.superstefo.automatic.investor.config;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
