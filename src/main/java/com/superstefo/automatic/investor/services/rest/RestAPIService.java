@@ -7,6 +7,7 @@ import com.superstefo.automatic.investor.services.rest.model.invest.Invest;
 import com.superstefo.automatic.investor.services.rest.model.main.info.MainInfo;
 import com.superstefo.automatic.investor.services.StateTypes;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -14,6 +15,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
 import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import static com.superstefo.automatic.investor.config.InvestProps.LOANS_URL;
 import static com.superstefo.automatic.investor.config.InvestProps.OVERVIEW_URL;
@@ -26,21 +29,28 @@ import static org.springframework.http.HttpMethod.POST;
 public final class RestAPIService extends RestAPIConnector {
 
     private final InvestProps investProps;
+    private final Executor executor;
     private final MultiValueMap<String, String> investingUserAuthHeaders;
 
-    RestAPIService(InvestProps investProps) {
+    RestAPIService(InvestProps investProps, @Qualifier("investTaskExecutor") Executor executor) {
         super(investProps);
         this.investProps = investProps;
+        this.executor = executor;
         confirmHostReachable();
         String authToken = this.getAuthTokenFromEndpoint(investProps.getEmail(), investProps.getPassword());
         this.investingUserAuthHeaders = getAuthHeaders(investProps, "Bearer " + authToken);
     }
 
-    public StateTypes doInvest(BigDecimal amount, Loan loan) {
-        if (amount.compareTo(InvestProps.MINIMUM_INVESTMENT) < 0) {
-            log.info("Will not invest due to low investment amount={} EUR invested for loan={};", amount, loan.getLoanId());
-            return StateTypes.NA;//do not return StateTypes.LOW_BALANCE as it is not certain
+    public CompletableFuture<StateTypes> invest(BigDecimal amountToInvest, Loan loan) {
+        if (amountToInvest.compareTo(InvestProps.MINIMUM_INVESTMENT) < 0) {
+            log.info("Will not invest due to low investment amount={} EUR invested for loan={};", amountToInvest, loan.getLoanId());
+            //do not return StateTypes.LOW_BALANCE as actual amount might be different:
+            return CompletableFuture.completedFuture(StateTypes.NA);
         }
+        return CompletableFuture.supplyAsync(() -> doInvest(amountToInvest, loan), executor);
+    }
+
+    private StateTypes doInvest(BigDecimal amount, Loan loan) {
         log.info("Investing in loanId={}; availableToInvest={}, myAmount={}",
                 loan.getLoanId(), loan.getAvailableToInvest(), amount);
 
@@ -72,6 +82,9 @@ public final class RestAPIService extends RestAPIConnector {
                     default -> throw exc;
                 };
     }
+    public CompletableFuture<MainInfo> getMainInfoAsync() {
+        return  CompletableFuture.supplyAsync(this::getMainInfo, executor);
+    }
 
     public MainInfo getMainInfo() {
         MainInfo mainInfo = this.exchange(
@@ -83,6 +96,7 @@ public final class RestAPIService extends RestAPIConnector {
         return mainInfo;
     }
 
+    @SuppressWarnings("unused")
     public String getLoanInfo(String id) {
         String res = this.exchange(
                 LOANS_URL + id,

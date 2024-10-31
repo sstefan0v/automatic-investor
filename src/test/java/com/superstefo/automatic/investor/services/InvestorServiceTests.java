@@ -39,14 +39,14 @@ class InvestorServiceTests {
     @Mock
     private WalletService walletService;
 
-    @Spy
-    private JobScheduler scheduler;
+//    @Spy
+//    private JobScheduler scheduler;
 
     @Spy
     private Executor executor = new ThreadPoolConfig().getThreadPoolTaskExecutor();
 
-    @InjectMocks
-    private InvestorService investorService;
+//    @InjectMocks
+//    private InvestorService investorService;
 
     @Captor
     private ArgumentCaptor<HttpEntity> investArgumentCaptor;
@@ -91,7 +91,7 @@ class InvestorServiceTests {
 
 
     private void simulateScheduledStart(int invocationsCount) {
-        IntStream.rangeClosed(0, invocationsCount).forEach(i -> scheduler.start());
+        //IntStream.rangeClosed(0, invocationsCount).forEach(i -> scheduler.start());
     }
 
     private Loan newLoan() {

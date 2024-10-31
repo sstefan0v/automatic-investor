@@ -1,14 +1,12 @@
 package com.superstefo.automatic.investor.services;
 
 import com.superstefo.automatic.investor.config.InvestProps;
-import com.superstefo.automatic.investor.services.rest.RestAPIService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,20 +14,12 @@ import static com.superstefo.automatic.investor.config.InvestProps.MINIMUM_INVES
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WalletService {
-
-    private volatile BigDecimal investorsFreeMoney;
+    private volatile BigDecimal investorsFreeMoney = BigDecimal.ZERO;
     private final InvestProps investProps;
-    private final RestAPIService restAPIService;
-    private final Executor executor;
+    private final InvestorFreeMoneyUpdater investorFreeMoneyUpdater;
     private final Lock lock = new ReentrantLock();
-
-    public WalletService(InvestProps investProps, RestAPIService restAPIService, @Qualifier("investTaskExecutor") Executor executor) {
-        this.investProps = investProps;
-        this.restAPIService = restAPIService;
-        this.executor = executor;
-        setInvestorsFreeMoney(BigDecimal.ZERO);
-    }
 
     public BigDecimal approveLoanMoney(BigDecimal availableInLoanForInvesting) {
         lock.lock();
@@ -55,7 +45,7 @@ public class WalletService {
         setInvestorsFreeMoney(investorsFreeMoney.subtract(freeMoney));
     }
 
-    public void setInvestorsFreeMoney(BigDecimal freeMoney) {
+    private void setInvestorsFreeMoney(BigDecimal freeMoney) {
         lock.lock();
         try {
             log.info("Updating investor's available money = {} ", freeMoney);
@@ -75,11 +65,15 @@ public class WalletService {
     }
 
     public void updateInvestorsFreeMoneyFromServer() {
-        CompletableFuture
-                .supplyAsync(restAPIService::getMainInfo, executor)
-                .thenAccept((mainInfo) -> {
-                    BigDecimal investorsFreeMoney = mainInfo.getAvailableMoney();
-                    setInvestorsFreeMoney(investorsFreeMoney);
-                });
+        investorFreeMoneyUpdater.getFromServer()
+                .thenAccept(this::setInvestorsFreeMoney);
+    }
+
+    public void updateInvestorsFreeMoneyFromServerRarely() {
+        CompletableFuture<BigDecimal> result = investorFreeMoneyUpdater.getFromServerRarely();
+        if (result == null) {
+            return;
+        }
+        result.thenAccept(this::setInvestorsFreeMoney);
     }
 }

@@ -1,17 +1,15 @@
 package com.superstefo.automatic.investor.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.math.BigDecimal;
-import java.lang.reflect.Field;
-import java.util.List;
 
 @ConfigurationProperties(prefix = "app")
-@Data
-@Slf4j
+@Getter
+@RequiredArgsConstructor
 public class InvestProps {
     private final String baseUrl;
     private final String email;
@@ -46,31 +44,4 @@ public class InvestProps {
     public static final String LOANS_URL = "v1/loans/";
     public static final String OVERVIEW_URL = "v1/investor/overview";
     public static final BigDecimal MINIMUM_INVESTMENT = BigDecimal.valueOf(10);
-    private List<String> excludedFields = List.of("excludedFields", "password", "log");
-
-    private void printAllFields() {
-        Field[] fields = this.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                if (isToLogField(field))
-                    log.info("{} = {}", field.getName(), field.get(this));
-            } catch (IllegalAccessException e) {
-                log.error(e.getMessage());
-            } finally {
-                field.setAccessible(false);
-            }
-        }
-    }
-
-    private boolean isToLogField(Field field) {
-        return !excludedFields.contains(field.getName());
-    }
-
-    @PostConstruct
-    private void logOnceAtStart() {
-        log.info("================================ Settings: ===================================");
-        printAllFields();
-        log.info("==============================================================================");
-    }
 }
