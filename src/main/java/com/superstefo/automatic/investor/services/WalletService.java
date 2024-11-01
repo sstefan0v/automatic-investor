@@ -48,7 +48,7 @@ public class WalletService {
     private void setInvestorsFreeMoney(BigDecimal freeMoney) {
         lock.lock();
         try {
-            log.info("Updating investor's available money = {} ", freeMoney);
+            log.debug("Updating investor's available money = {} ", freeMoney);
             this.investorsFreeMoney = freeMoney;
         } finally {
             lock.unlock();

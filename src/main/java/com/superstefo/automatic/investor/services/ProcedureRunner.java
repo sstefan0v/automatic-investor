@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @RequiredArgsConstructor
 public class ProcedureRunner {
     private final Lock lock = new ReentrantLock();
+    private final OneLineLogger oneLineLogger = OneLineLogger.create();
 
     private final TooManyRequestsProcedure tooManyRequestsProcedure;
     private final LowInvestorBalanceProcedure lowInvestorBalanceProcedure;
@@ -50,6 +51,7 @@ public class ProcedureRunner {
         LocalTime now = LocalTime.now();
 
         if (now.isBefore(startHour) || now.isAfter(finishHour)) {
+            oneLineLogger.print("Skip, outside of working hours:",".");
             log.debug("Skipping run, since it is outside of work hours ");
             return;
         }

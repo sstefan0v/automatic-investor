@@ -1,6 +1,7 @@
 package com.superstefo.automatic.investor.services.rest;
 
 import com.superstefo.automatic.investor.config.InvestProps;
+import com.superstefo.automatic.investor.services.OneLineLogger;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.AllLoans;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.Loan;
 import com.superstefo.automatic.investor.services.rest.model.invest.Invest;
@@ -31,6 +32,7 @@ public final class RestAPIService extends RestAPIConnector {
     private final InvestProps investProps;
     private final Executor executor;
     private final MultiValueMap<String, String> investingUserAuthHeaders;
+    private final OneLineLogger oneLineLogger = OneLineLogger.create();
 
     RestAPIService(InvestProps investProps, @Qualifier("investTaskExecutor") Executor executor) {
         super(investProps);
@@ -82,8 +84,9 @@ public final class RestAPIService extends RestAPIConnector {
                     default -> throw exc;
                 };
     }
+
     public CompletableFuture<MainInfo> getMainInfoAsync() {
-        return  CompletableFuture.supplyAsync(this::getMainInfo, executor);
+        return CompletableFuture.supplyAsync(this::getMainInfo, executor);
     }
 
     public MainInfo getMainInfo() {
@@ -113,7 +116,9 @@ public final class RestAPIService extends RestAPIConnector {
                 HttpMethod.GET,
                 new HttpEntity<>("", this.investingUserAuthHeaders),
                 AllLoans.class);
-        log.debug("Found loans: {}", allLoans.getData() != null ? allLoans.getData().size() : allLoans.getTotal());
+        int foundLoansSize = allLoans.getData() != null ? allLoans.getData().size() : allLoans.getTotal();
+        oneLineLogger.print("Found loans: ", "" + foundLoansSize);
+        log.debug("Found loans: {}", foundLoansSize);
         return allLoans;
     }
 }
