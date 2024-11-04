@@ -64,11 +64,12 @@ public class WalletService {
         }
     }
 
-    public void updateFreeInvestorsMoneyFromServer() {
+    public CompletableFuture<BigDecimal> updateFreeInvestorsMoneyFromServer() {
         CompletableFuture<BigDecimal> result = freeInvestorMoneyUpdater.getFromServer();
         if (result == null) {
-            return;
+            return null;
         }
         result.thenAccept(this::setInvestorsFreeMoney);
+        return result;
     }
 }

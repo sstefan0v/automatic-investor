@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
@@ -26,9 +28,10 @@ public class StartingProcedure implements Startable {
 
     @Override
     public void start() {
-        wallet.updateFreeInvestorsMoneyFromServer();
+        CompletableFuture<BigDecimal> future = wallet.updateFreeInvestorsMoneyFromServer();
         logOnceAtStart();
         procedureRunner.nextRunFindLoansProcedure();
+        future.thenAccept(money -> log.info("Free investor's funds: {}", money));
     }
 
     private void printFields() {
