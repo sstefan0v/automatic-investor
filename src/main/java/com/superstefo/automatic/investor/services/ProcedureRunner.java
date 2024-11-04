@@ -30,7 +30,7 @@ public class ProcedureRunner {
     private StateTypes state = StateTypes.OK;
     private volatile long futureInstant = 0;
 
-    private Startable whatToRunNext;
+    private Startable procedureToRunNext;
     private LocalTime startHour;
     private LocalTime finishHour;
 
@@ -38,7 +38,7 @@ public class ProcedureRunner {
     public void init() {
         startHour = props.getWorkCyclesStartHour();
         finishHour = props.getWorkCyclesFinishHour();
-        setWhatToRunNext(startingProcedure);
+        setProcedureToRunNext(startingProcedure);
     }
 
     @Scheduled(initialDelay = 100, fixedRateString = "${pollFrequency}")
@@ -50,12 +50,15 @@ public class ProcedureRunner {
 
         LocalTime now = LocalTime.now();
 
-        if (now.isBefore(startHour) || now.isAfter(finishHour)) {
-            oneLineLogger.print("Skip, outside of working hours:",".");
-            log.debug("Skipping run, since it is outside of work hours ");
+        if (now.isBefore(startHour)) {
+            oneLineLogger.print("Skip, not yet in work hours:",".");
+            log.debug("Skipping run, not yet in work hours ");
             return;
+        } else if (now.isAfter(finishHour)){
+            log.info("App will shut down, since it is after working hours... ");
+            System.exit(0);
         }
-        whatToRunNext.start();
+        procedureToRunNext.start();
     }
 
     private boolean isToWaitMore() {
@@ -79,20 +82,20 @@ public class ProcedureRunner {
     }
 
     public void nextRunLowInvestorBalanceProcedure() {
-        setWhatToRunNext(lowInvestorBalanceProcedure);
+        setProcedureToRunNext(lowInvestorBalanceProcedure);
     }
 
     public void nextRunFindLoansProcedure() {
-        setWhatToRunNext(findLoansProcedure);
+        setProcedureToRunNext(findLoansProcedure);
     }
 
     public void nextRunTooManyRequestsProcedure() {
-        setWhatToRunNext(tooManyRequestsProcedure);
+        setProcedureToRunNext(tooManyRequestsProcedure);
     }
 
-    private void setWhatToRunNext(Startable whatToRunNext) {
-        log.info("Next Procedure to run: {}", whatToRunNext.getClass().getSimpleName());
-        this.whatToRunNext = whatToRunNext;
+    public void setProcedureToRunNext(Startable procedureToRunNext) {
+        log.info("Next Procedure to run: {}", procedureToRunNext.getClass().getSimpleName());
+        this.procedureToRunNext = procedureToRunNext;
     }
 }
 

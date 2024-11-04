@@ -37,11 +37,10 @@ public class FindLoansProcedure implements Startable {
 
     @Override
     public void start() {
+        wallet.updateFreeInvestorsMoneyFromServer();
         if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) < 0) {
             procedureRunner.nextRunLowInvestorBalanceProcedure();
         }
-        wallet.updateInvestorsFreeMoneyFromServerRarely();
-
         investInLoans(restAPIService.getAvailableLoans());
     }
 
@@ -81,6 +80,10 @@ public class FindLoansProcedure implements Startable {
     }
 
     private void invest(BigDecimal amountToInvest, Loan loan) {
+        if (amountToInvest.compareTo(InvestProps.MINIMUM_INVESTMENT) < 0) {
+            log.info("Will not invest in loan={} as investment amount is less than MIN;", loan.getLoanId());
+            return;
+        }
         restAPIService
                 .invest(amountToInvest, loan)
                 .thenAccept(actDependingOnInvestCallResult(amountToInvest, loan));
@@ -92,15 +95,14 @@ public class FindLoansProcedure implements Startable {
                 case OK -> {
                     triedLoans.put(loan.getLoanId(), loan);
                     wallet.pull(amountToInvest);
-                    wallet.updateInvestorsFreeMoneyFromServer();
                     log.debug("Invested in loan. Will be skipped next time, loanId={}", loan.getLoanId());
                 }
                 case LOAN_SOLD, LOAN_LESS_THAN_MIN -> {
                     triedLoans.put(loan.getLoanId(), loan);
                     log.debug("Loan will be skipped next time, loanId={}", loan.getLoanId());
                 }
-                case LOW_BALANCE -> wallet.updateInvestorsFreeMoneyFromServer();
-                case TOO_MANY_REQUESTS ->  procedureRunner.nextRunTooManyRequestsProcedure();
+                case LOW_BALANCE -> {}
+                case TOO_MANY_REQUESTS -> procedureRunner.nextRunTooManyRequestsProcedure();
                 default -> log.warn("Unhandled stateType: {}", state);
             }
         };

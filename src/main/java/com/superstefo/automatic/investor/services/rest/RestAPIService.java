@@ -44,11 +44,6 @@ public final class RestAPIService extends RestAPIConnector {
     }
 
     public CompletableFuture<StateTypes> invest(BigDecimal amountToInvest, Loan loan) {
-        if (amountToInvest.compareTo(InvestProps.MINIMUM_INVESTMENT) < 0) {
-            log.info("Will not invest due to low investment amount={} EUR invested for loan={};", amountToInvest, loan.getLoanId());
-            //do not return StateTypes.LOW_BALANCE as actual amount might be different:
-            return CompletableFuture.completedFuture(StateTypes.NA);
-        }
         return CompletableFuture.supplyAsync(() -> doInvest(amountToInvest, loan), executor);
     }
 
@@ -117,8 +112,8 @@ public final class RestAPIService extends RestAPIConnector {
                 new HttpEntity<>("", this.investingUserAuthHeaders),
                 AllLoans.class);
         int foundLoansSize = allLoans.getData() != null ? allLoans.getData().size() : allLoans.getTotal();
-        oneLineLogger.print("Found loans: ", "" + foundLoansSize);
         log.debug("Found loans: {}", foundLoansSize);
+        oneLineLogger.print("Found loans: ", "" + foundLoansSize);
         return allLoans;
     }
 }

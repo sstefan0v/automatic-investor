@@ -1,6 +1,7 @@
 package com.superstefo.automatic.investor.services;
 
 import com.superstefo.automatic.investor.services.rest.RestAPIService;
+import com.superstefo.automatic.investor.services.rest.model.main.info.MainInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,8 +14,8 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class InvestorFreeMoneyUpdater {
-    public static final int WAIT_DURATION_SECONDS = 10;
+public class FreeInvestorMoneyUpdater {
+    public static final int WAIT_DURATION_SECONDS = 11;
 
     private final RestAPIService restAPIService;
 
@@ -23,19 +24,12 @@ public class InvestorFreeMoneyUpdater {
     private volatile long futureInstant = 0;
 
     public CompletableFuture<BigDecimal> getFromServer() {
-       return restAPIService.getMainInfoAsync()
-                .thenApply((mainInfo)->{
-                    postponeNextUpdate();
-                    return mainInfo.getAvailableMoney();
-                });
-    }
-
-    public CompletableFuture<BigDecimal> getFromServerRarely() {
         if (isToWaitMore()) {
-               log.debug("Waiting to update investor's free money from server");
+            log.debug("Skipping update investor's free money from server");
             return null;
         }
-       return getFromServer();
+        postponeNextUpdate();
+        return restAPIService.getMainInfoAsync().thenApply(MainInfo::getAvailableMoney);
     }
 
     private boolean isToWaitMore() {

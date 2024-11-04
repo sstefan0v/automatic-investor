@@ -26,7 +26,7 @@ public class StartingProcedure implements Startable {
 
     @Override
     public void start() {
-        wallet.updateInvestorsFreeMoneyFromServer();
+        wallet.updateFreeInvestorsMoneyFromServer();
         logOnceAtStart();
         procedureRunner.nextRunFindLoansProcedure();
     }

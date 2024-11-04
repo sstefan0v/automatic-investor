@@ -24,7 +24,7 @@ public class LowInvestorBalanceProcedure implements Startable {
 
     @Override
     public void start() {
-        wallet.updateInvestorsFreeMoneyFromServerRarely();
+        wallet.updateFreeInvestorsMoneyFromServer();
         if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) >= 0) {
             procedureRunner.nextRunFindLoansProcedure();
         } else {

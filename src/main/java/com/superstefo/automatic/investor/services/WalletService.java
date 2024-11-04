@@ -18,7 +18,7 @@ import static com.superstefo.automatic.investor.config.InvestProps.MINIMUM_INVES
 public class WalletService {
     private volatile BigDecimal investorsFreeMoney = BigDecimal.ZERO;
     private final InvestProps investProps;
-    private final InvestorFreeMoneyUpdater investorFreeMoneyUpdater;
+    private final FreeInvestorMoneyUpdater freeInvestorMoneyUpdater;
     private final Lock lock = new ReentrantLock();
 
     public BigDecimal approveLoanMoney(BigDecimal availableInLoanForInvesting) {
@@ -64,13 +64,8 @@ public class WalletService {
         }
     }
 
-    public void updateInvestorsFreeMoneyFromServer() {
-        investorFreeMoneyUpdater.getFromServer()
-                .thenAccept(this::setInvestorsFreeMoney);
-    }
-
-    public void updateInvestorsFreeMoneyFromServerRarely() {
-        CompletableFuture<BigDecimal> result = investorFreeMoneyUpdater.getFromServerRarely();
+    public void updateFreeInvestorsMoneyFromServer() {
+        CompletableFuture<BigDecimal> result = freeInvestorMoneyUpdater.getFromServer();
         if (result == null) {
             return;
         }
