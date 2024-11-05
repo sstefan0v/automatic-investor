@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 @RequiredArgsConstructor
 public class FreeInvestorMoneyUpdater {
-    public static final int WAIT_DURATION_SECONDS = 11;
+    public static final int WAIT_DURATION_SECONDS = 16;
 
     private final RestAPIService restAPIService;
 
@@ -25,7 +25,7 @@ public class FreeInvestorMoneyUpdater {
 
     public CompletableFuture<BigDecimal> getFromServer() {
         if (isToWaitMore()) {
-            log.debug("Skipping update investor's free money from server");
+            log.debug("Will Skip updating investor's free money from server");
             return null;
         }
         postponeNextUpdate();

@@ -49,28 +49,30 @@ public class FindLoansProcedure implements Startable {
             return;
         }
 
+        Collections.reverse(allLoans.getData());
+
         log.debug("Loans found for investment:");
         allLoans.getData().forEach(loan -> log.info("Loan {}, from {}, at {}%", loan.getLoanId(), loan.getCountry(),
                 loan.getInterestRate()));
-
-        Collections.reverse(allLoans.getData());
 
         allLoans
                 .getData()
                 .stream()
                 .filter(Loan::isAllowedToInvest)
-                .filter(loan -> !triedLoans.containsKey(loan.getLoanId()))
                 .forEach(getMoneyAndInvest());
     }
 
     private Consumer<Loan> getMoneyAndInvest() {
         return loan -> {
+            if (triedLoans.containsKey(loan.getLoanId())) {
+                log.debug("Will skip investment in LoanId={}.", loan.getLoanId());
+                return;
+            }
             BigDecimal amountToInvest = wallet.approveLoanMoney(loan.getAvailableToInvest());
             invest(amountToInvest, loan);
 
             try {
                 if (loan.getTermType().equalsIgnoreCase("short")) {
-                    log.debug("Waiting as loan is short term.");
                     Thread.sleep(investProps.getWaitBetweenInvestingInShortTermLoans());
                 }
             } catch (InterruptedException e) {
@@ -91,16 +93,13 @@ public class FindLoansProcedure implements Startable {
 
     private Consumer<StateTypes> actDependingOnInvestCallResult(BigDecimal amountToInvest, Loan loan) {
         return (state) -> {
+            log.debug("Investment call result={} for loanId={}", state, loan.getLoanId());
             switch (state) {
                 case OK -> {
                     triedLoans.put(loan.getLoanId(), loan);
                     wallet.pull(amountToInvest);
-                    log.debug("Invested in loan. Will be skipped next time, loanId={}", loan.getLoanId());
                 }
-                case LOAN_SOLD, LOAN_LESS_THAN_MIN -> {
-                    triedLoans.put(loan.getLoanId(), loan);
-                    log.debug("Loan will be skipped next time, loanId={}", loan.getLoanId());
-                }
+                case LOAN_SOLD, LOAN_LESS_THAN_MIN, SERVER_ERROR -> triedLoans.put(loan.getLoanId(), loan);
                 case LOW_BALANCE -> {}
                 case TOO_MANY_REQUESTS -> procedureRunner.nextRunTooManyRequestsProcedure();
                 default -> log.warn("Unhandled stateType: {}", state);

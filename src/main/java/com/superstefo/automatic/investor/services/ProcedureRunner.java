@@ -75,7 +75,7 @@ public class ProcedureRunner {
         try {
             futureInstant = System.currentTimeMillis() + (seconds * 1000L);
             this.state = state;
-            log.debug("Postponing next run for {} seconds due to {}", seconds, state);
+            log.info("Postponing next run for {} seconds due to {}", seconds, state);
         } finally {
             lock.unlock();
         }
