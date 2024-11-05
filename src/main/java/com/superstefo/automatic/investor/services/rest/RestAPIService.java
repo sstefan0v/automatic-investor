@@ -19,8 +19,8 @@ import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.superstefo.automatic.investor.config.InvestProps.LOANS_URL;
-import static com.superstefo.automatic.investor.config.InvestProps.OVERVIEW_URL;
+import static com.superstefo.automatic.investor.config.Constants.LOANS_URL;
+import static com.superstefo.automatic.investor.config.Constants.OVERVIEW_URL;
 import static com.superstefo.automatic.investor.services.rest.HttpHeaderUtils.getAuthHeaders;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;

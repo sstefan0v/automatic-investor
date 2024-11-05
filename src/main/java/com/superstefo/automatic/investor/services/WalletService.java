@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.superstefo.automatic.investor.config.InvestProps.MINIMUM_INVESTMENT;
+import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
 
 @Service
 @Slf4j

@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
 
-import static com.superstefo.automatic.investor.config.InvestProps.MINIMUM_INVESTMENT;
+import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 

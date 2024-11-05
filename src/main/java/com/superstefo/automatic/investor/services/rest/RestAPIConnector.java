@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 
-import static com.superstefo.automatic.investor.config.InvestProps.LOGIN_URL;
+import static com.superstefo.automatic.investor.config.Constants.LOGIN_URL;
 import static com.superstefo.automatic.investor.services.rest.HttpHeaderUtils.getLoginHeaders;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;

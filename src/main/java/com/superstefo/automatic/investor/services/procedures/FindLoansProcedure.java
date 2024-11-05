@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.superstefo.automatic.investor.config.InvestProps.MINIMUM_INVESTMENT;
+import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
 
 @Component
 @Slf4j
@@ -82,7 +82,7 @@ public class FindLoansProcedure implements Startable {
     }
 
     private void invest(BigDecimal amountToInvest, Loan loan) {
-        if (amountToInvest.compareTo(InvestProps.MINIMUM_INVESTMENT) < 0) {
+        if (amountToInvest.compareTo(MINIMUM_INVESTMENT) < 0) {
             log.info("Will not invest in loan={} as investment amount is less than MIN;", loan.getLoanId());
             return;
         }

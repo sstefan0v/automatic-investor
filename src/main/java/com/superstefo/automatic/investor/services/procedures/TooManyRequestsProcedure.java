@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import static com.superstefo.automatic.investor.config.InvestProps.MINIMUM_INVESTMENT;
+
+import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
 import static com.superstefo.automatic.investor.services.StateTypes.TOO_MANY_REQUESTS;
 
 @Component

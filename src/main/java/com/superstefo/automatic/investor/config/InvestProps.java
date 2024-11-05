@@ -14,15 +14,15 @@ public class InvestProps {
     private final String baseUrl;
     private final String email;
     private final String password;
-    private final String pageSize;
-    private final String maxRemainingTerm;
-    private final String minRemainingTerm;
-    private final String minInterestRate;
-    private final String pageOffset;
+    private final int pageSize;
+    private final int maxRemainingTerm;
+    private final int minRemainingTerm;
+    private final double minInterestRate;
+    private final int pageOffset;
     private final int pollFrequency;
     private final String publicId;
-    private final String hideInvested;
-    private final String groupGuarantee;
+    private final int hideInvested;
+    private final int groupGuarantee;
     private final BigDecimal howMuchMoneyToInvest;
     private final int lowInvestorBalanceWaitingDuration;
     private final int tooManyRequestsWaitingDuration;
@@ -41,9 +41,4 @@ public class InvestProps {
                 "&groupGuarantee=" + groupGuarantee +
                 "&offset=" + pageOffset;
     }
-
-    public static final String LOGIN_URL = "v1/investor/login";
-    public static final String LOANS_URL = "v1/loans/";
-    public static final String OVERVIEW_URL = "v1/investor/overview";
-    public static final BigDecimal MINIMUM_INVESTMENT = BigDecimal.valueOf(10);
 }
