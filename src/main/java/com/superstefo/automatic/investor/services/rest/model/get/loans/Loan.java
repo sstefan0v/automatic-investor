@@ -16,7 +16,7 @@ public class Loan {
     private String termTypeTitle;
     private String status;
     private String statusTitle;
-    private int interestRate;
+    private double interestRate;
     private int remainingTerm;
     private int term;
     private int initialTerm;
