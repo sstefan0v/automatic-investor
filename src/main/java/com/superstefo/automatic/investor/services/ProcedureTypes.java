@@ -4,5 +4,5 @@ public enum ProcedureTypes {
     STARTING,
     FIND_LOANS,
     LOW_BALANCE,
-    TOO_MANY_REQUESTS;
+    TOO_MANY_REQUESTS
 }
