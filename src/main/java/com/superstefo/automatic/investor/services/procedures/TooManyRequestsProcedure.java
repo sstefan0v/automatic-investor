@@ -1,12 +1,10 @@
 package com.superstefo.automatic.investor.services.procedures;
 
-import com.superstefo.automatic.investor.config.InvestProps;
-import com.superstefo.automatic.investor.services.ProcedureRunner;
+import com.superstefo.automatic.investor.services.CycleDelayService;
+import com.superstefo.automatic.investor.services.NextProcedureSelector;
 import com.superstefo.automatic.investor.services.WalletService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
@@ -17,21 +15,16 @@ import static com.superstefo.automatic.investor.services.StateTypes.TOO_MANY_REQ
 @RequiredArgsConstructor
 public class TooManyRequestsProcedure implements Startable {
     private final WalletService wallet;
-    private ProcedureRunner procedureRunner;
-    private final InvestProps investProps;
+    private final NextProcedureSelector nextProcedureSelector;
+    private final CycleDelayService cycleDelayService;
 
     @Override
     public void start() {
         if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) >= 0) {
-            procedureRunner.nextRunFindLoansProcedure();
+            nextProcedureSelector.findLoansProcedure();
         } else {
-            procedureRunner.nextRunLowInvestorBalanceProcedure();
+            nextProcedureSelector.lowInvestorBalanceProcedure();
         }
-        procedureRunner.postpone(investProps.getTooManyRequestsWaitingDuration(), TOO_MANY_REQUESTS);
-    }
-
-    @Autowired
-    public void setProcedureRunner(@Lazy ProcedureRunner procedureRunner) {
-        this.procedureRunner = procedureRunner;
+        cycleDelayService.postponeForTooManyRequests(TOO_MANY_REQUESTS.info);
     }
 }
