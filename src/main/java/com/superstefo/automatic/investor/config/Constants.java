@@ -6,5 +6,6 @@ public class Constants {
     public static final String LOGIN_URL = "v1/investor/login";
     public static final String LOANS_URL = "v1/loans/";
     public static final String OVERVIEW_URL = "v1/investor/overview";
+    public static final int INVESTOR_BALANCE_UPDATE_INTERVAL_SECONDS = 16 * 1000;
     public static final BigDecimal MINIMUM_INVESTMENT = BigDecimal.valueOf(10);
 }

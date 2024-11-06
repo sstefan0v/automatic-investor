@@ -1,17 +1,13 @@
 package com.superstefo.automatic.investor.services.procedures;
 
 import com.superstefo.automatic.investor.config.InvestProps;
-import com.superstefo.automatic.investor.services.ProcedureRunner;
-import com.superstefo.automatic.investor.services.StateTypes;
-import com.superstefo.automatic.investor.services.WalletService;
+import com.superstefo.automatic.investor.services.*;
 import com.superstefo.automatic.investor.services.rest.RestAPIService;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.AllLoans;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.Loan;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -28,18 +24,17 @@ import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTM
 @RequiredArgsConstructor
 public class FindLoansProcedure implements Startable {
 
-    private ProcedureRunner procedureRunner;
-    private final InvestProps investProps;
+    private final InvestProps props;
     private final WalletService wallet;
     private final RestAPIService restAPIService;
+    private final NextProcedureSelector nextProcedureSelector;
 
     private final Map<Integer, Loan> triedLoans = new HashMap<>();
 
     @Override
     public void start() {
-        wallet.updateFreeInvestorsMoneyFromServer();
         if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) < 0) {
-            procedureRunner.nextRunLowInvestorBalanceProcedure();
+            nextProcedureSelector.lowInvestorBalanceProcedure();
         }
         investInLoans(restAPIService.getAvailableLoans());
     }
@@ -73,7 +68,7 @@ public class FindLoansProcedure implements Startable {
 
             try {
                 if (loan.getTermType().equalsIgnoreCase("short")) {
-                    Thread.sleep(investProps.getWaitBetweenInvestingInShortTermLoans());
+                    Thread.sleep(props.getWaitBetweenInvestingInShortTermLoans());
                 }
             } catch (InterruptedException e) {
                 log.error("Error while waiting for loan investment. ", e);
@@ -100,15 +95,10 @@ public class FindLoansProcedure implements Startable {
                     wallet.pull(amountToInvest);
                 }
                 case LOAN_SOLD, LOAN_LESS_THAN_MIN, SERVER_ERROR -> triedLoans.put(loan.getLoanId(), loan);
-                case LOW_BALANCE -> {}
-                case TOO_MANY_REQUESTS -> procedureRunner.nextRunTooManyRequestsProcedure();
+                case LOW_BALANCE -> nextProcedureSelector.lowInvestorBalanceProcedure();
+                case TOO_MANY_REQUESTS -> nextProcedureSelector.tooManyRequestsProcedure();
                 default -> log.warn("Unhandled stateType: {}", state);
             }
         };
-    }
-
-    @Autowired
-    public void setProcedureRunner(@Lazy ProcedureRunner procedureRunner) {
-        this.procedureRunner = procedureRunner;
     }
 }
