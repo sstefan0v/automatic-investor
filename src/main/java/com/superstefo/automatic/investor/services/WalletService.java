@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -18,7 +17,7 @@ import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTM
 public class WalletService {
     private volatile BigDecimal investorsFreeMoney = BigDecimal.ZERO;
     private final InvestProps investProps;
-    private final FreeInvestorMoneyUpdater freeInvestorMoneyUpdater;
+
     private final Lock lock = new ReentrantLock();
 
     public BigDecimal approveLoanMoney(BigDecimal availableInLoanForInvesting) {
@@ -45,7 +44,7 @@ public class WalletService {
         setInvestorsFreeMoney(investorsFreeMoney.subtract(freeMoney));
     }
 
-    private void setInvestorsFreeMoney(BigDecimal freeMoney) {
+    public void setInvestorsFreeMoney(BigDecimal freeMoney) {
         lock.lock();
         try {
             log.debug("Updating investor's available money = {} ", freeMoney);
@@ -62,14 +61,5 @@ public class WalletService {
         } finally {
             lock.unlock();
         }
-    }
-
-    public CompletableFuture<BigDecimal> updateFreeInvestorsMoneyFromServer() {
-        CompletableFuture<BigDecimal> result = freeInvestorMoneyUpdater.getFromServer();
-        if (result == null) {
-            return null;
-        }
-        result.thenAccept(this::setInvestorsFreeMoney);
-        return result;
     }
 }
