@@ -13,7 +13,6 @@ import java.util.Objects;
 
 import static com.superstefo.automatic.investor.config.Constants.LOGIN_URL;
 import static com.superstefo.automatic.investor.services.rest.HttpHeaderUtils.getLoginHeaders;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
 @Service
@@ -35,7 +34,7 @@ public abstract class RestAPIConnector {
         throw new RuntimeException();
     }
 
-    String getAuthTokenFromEndpoint(String email, String password) {
+   String getAuthTokenFromEndpoint(String email, String password) {
         String url = investProps.getBaseUrl() + LOGIN_URL;
         log.debug("Preparing request, sending credentials to url={}, email={}", url, email);
         try {
@@ -51,25 +50,11 @@ public abstract class RestAPIConnector {
         throw new RuntimeException();
     }
 
-    void confirmHostReachable() {
-        log.debug("Preparing request, confirming host is reachable...{}", investProps.getBaseUrl());
-        try {
-            restTemplate.exchange(
-                    investProps.getBaseUrl(),
-                    GET,
-                    new HttpEntity<>(null, getLoginHeaders(investProps)),
-                    String.class);
-
-        } catch (RuntimeException e) {
-            whatToDoNextBasedOnException(e);
-        }
-    }
-
     private String getLoginBody(String email, String password) {
         return "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
     }
 
-    private void whatToDoNextBasedOnException(RuntimeException exc) {
+    void whatToDoNextBasedOnException(RuntimeException exc) {
         switch (exc) {
             case HttpClientErrorException.Unauthorized e:
                 stopApp(e);

@@ -22,6 +22,7 @@ import java.util.concurrent.Executor;
 import static com.superstefo.automatic.investor.config.Constants.LOANS_URL;
 import static com.superstefo.automatic.investor.config.Constants.OVERVIEW_URL;
 import static com.superstefo.automatic.investor.services.rest.HttpHeaderUtils.getAuthHeaders;
+import static com.superstefo.automatic.investor.services.rest.HttpHeaderUtils.getLoginHeaders;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -78,6 +79,19 @@ public final class RestAPIService extends RestAPIConnector {
                     }
                     default -> throw exc;
                 };
+    }
+
+    public void confirmHostReachable() {
+        log.debug("Checking if host is reachable...{}", investProps.getBaseUrl());
+        try {
+            exchange(
+                    "",
+                    GET,
+                    new HttpEntity<>(null, getLoginHeaders(investProps)),
+                    String.class);
+        } catch (RuntimeException e) {
+            whatToDoNextBasedOnException(e);
+        }
     }
 
     public CompletableFuture<MainInfo> getMainInfoAsync() {
