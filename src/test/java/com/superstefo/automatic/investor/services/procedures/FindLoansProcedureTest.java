@@ -1,13 +1,13 @@
 package com.superstefo.automatic.investor.services.procedures;
 
 import com.superstefo.automatic.investor.config.InvestProps;
-import com.superstefo.automatic.investor.services.ProcedureRunner;
+import com.superstefo.automatic.investor.services.JobScheduler;
+import com.superstefo.automatic.investor.services.NextProcedureSelector;
 import com.superstefo.automatic.investor.services.StateTypes;
 import com.superstefo.automatic.investor.services.WalletService;
 import com.superstefo.automatic.investor.services.rest.RestAPIService;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.AllLoans;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.Loan;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 class FindLoansProcedureTest {
 
     @Mock
-    private ProcedureRunner procedureRunnerMock;
+    private JobScheduler jobSchedulerMock;
 
     @Mock
     @SuppressWarnings("unused")
@@ -44,6 +44,9 @@ class FindLoansProcedureTest {
     @Mock
     private RestAPIService restAPIServiceMock;
 
+    @Mock
+    private NextProcedureSelector nextProcedureSelector;
+
     @InjectMocks
     private FindLoansProcedure findLoansProcedure;
 
@@ -52,12 +55,6 @@ class FindLoansProcedureTest {
 
     @Captor
     private ArgumentCaptor<Loan> loanArgumentCaptor;
-
-
-    @BeforeEach
-    void setUp() {
-        findLoansProcedure.setProcedureRunner(procedureRunnerMock);
-    }
 
     @Test
     void willInvestInALoanSuccessfully() {
@@ -76,7 +73,7 @@ class FindLoansProcedureTest {
         assertThat(investmentMoneyArgumentCaptor.getValue(), equalTo(BigDecimal.TEN));
 
         assertThat(loanArgumentCaptor.getValue().getLoanId(), equalTo(1234));
-        verifyNoInteractions(procedureRunnerMock);
+        verifyNoInteractions(jobSchedulerMock);
     }
 
     @Test
@@ -94,7 +91,7 @@ class FindLoansProcedureTest {
 
         simulateScheduledStart(2);
 
-        verify(procedureRunnerMock, times(1)).nextRunTooManyRequestsProcedure();
+        verify(nextProcedureSelector, times(1)).tooManyRequestsProcedure();
     }
 
     @Test
@@ -103,7 +100,7 @@ class FindLoansProcedureTest {
 
         simulateScheduledStart(1);
 
-        verify(procedureRunnerMock, times(1)).nextRunLowInvestorBalanceProcedure ();
+        verify(nextProcedureSelector, times(1)).lowInvestorBalanceProcedure();
     }
 
     @ParameterizedTest
@@ -121,7 +118,8 @@ class FindLoansProcedureTest {
 
         simulateScheduledStart(3);
 
-        verify(restAPIServiceMock, times(1)).invest(investmentMoneyArgumentCaptor.capture(), loanArgumentCaptor.capture());
+        verify(restAPIServiceMock, times(1))
+                .invest(investmentMoneyArgumentCaptor.capture(), loanArgumentCaptor.capture());
     }
 
     private void simulateScheduledStart(int invocationsCount) {
