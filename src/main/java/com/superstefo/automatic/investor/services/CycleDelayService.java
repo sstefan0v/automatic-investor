@@ -41,7 +41,7 @@ public class CycleDelayService {
     private boolean isOutOfWorkHours() {
         LocalTime now = LocalTime.now();
         if (now.isBefore(startHour)) {
-            oneLineLogger.print("Skip, not yet in work hours:",".");
+            oneLineLogger.print("Skip, not yet in work hours:", ".");
             log.debug("Skipping run, not yet in work hours ");
             return true;
         } else if (now.isAfter(finishHour)) {
@@ -61,11 +61,11 @@ public class CycleDelayService {
         }
     }
 
-    public void postponeForTooManyRequests( String text) {
+    public void postponeForTooManyRequests(String text) {
         postpone(props.getTooManyRequestsWaitingDuration(), text);
     }
 
-    public void postponeForLowInvestorBalance( String text) {
+    public void postponeForLowInvestorBalance(String text) {
         postpone(props.getLowInvestorBalanceWaitingDuration(), text);
     }
 }

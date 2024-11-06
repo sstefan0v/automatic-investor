@@ -25,7 +25,7 @@ public class LowInvestorBalanceProcedure implements Startable {
         if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) >= 0) {
             nextProcedureSelector.findLoansProcedure();
         } else {
-            cycleDelayService.postponeForLowInvestorBalance("Free balance: " + wallet.getInvestorsFreeMoney());
+            cycleDelayService.postponeForLowInvestorBalance("Free investor's funds: " + wallet.getInvestorsFreeMoney());
         }
     }
 }
