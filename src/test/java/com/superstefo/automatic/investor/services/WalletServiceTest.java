@@ -9,31 +9,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.concurrent.CompletableFuture;
 
 import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.jupiter.api.AfterEach;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class WalletServiceTest {
 
-    @BeforeEach
-    void setUp() {
-    }
-
-    @AfterEach
-    void tearDown() {
-    }
-
     @Mock
     private InvestProps props;
-
-    @Mock
-    private FreeInvestorMoneyUpdater freeInvestorMoneyUpdater;
 
     @InjectMocks
     private WalletService walletService;
@@ -109,8 +96,6 @@ class WalletServiceTest {
     }
 
     void setup(double investorsFreeMoney) {
-        when(freeInvestorMoneyUpdater.getFromServer()).thenReturn(
-                (CompletableFuture<BigDecimal>) CompletableFuture.completedStage(new BigDecimal(investorsFreeMoney)));
-        walletService.updateFreeInvestorsMoneyFromServer();
+        walletService.setInvestorsFreeMoney(new BigDecimal(investorsFreeMoney));
     }
 }
