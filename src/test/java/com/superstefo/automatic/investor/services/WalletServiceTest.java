@@ -95,6 +95,13 @@ class WalletServiceTest {
         assertThat(approvedMoney, equalTo(BigDecimal.valueOf(20)));
     }
 
+    @Test
+    void willPullMoneyCorrectly() {
+        setup(21d);
+        walletService.pull(walletService.approveLoanMoney(BigDecimal.TEN));
+        assertThat(walletService.getInvestorsFreeMoney(), equalTo(BigDecimal.valueOf(11)));
+    }
+
     void setup(double investorsFreeMoney) {
         walletService.setInvestorsFreeMoney(new BigDecimal(investorsFreeMoney));
     }

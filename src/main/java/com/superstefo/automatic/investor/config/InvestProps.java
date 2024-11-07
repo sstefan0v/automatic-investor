@@ -17,7 +17,7 @@ public class InvestProps {
     private final int pageSize;
     private final int maxRemainingTerm;
     private final int minRemainingTerm;
-    private final double minInterestRate;
+    private final BigDecimal minInterestRate;
     private final int pageOffset;
     private final int pollFrequency;
     private final String publicId;
