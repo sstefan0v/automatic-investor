@@ -27,9 +27,7 @@ public class CycleDelayService {
         finishHour = props.getWorkCyclesFinishHour();
     }
 
-    public boolean isToWaitMore() {
-        if (isOutOfWorkHours()) return true;
-
+    public boolean isToWaitDueToPostponing() {
         lock.lock();
         try {
             return futureInstant > System.currentTimeMillis();
@@ -38,7 +36,7 @@ public class CycleDelayService {
         }
     }
 
-    private boolean isOutOfWorkHours() {
+    public boolean isToWaitDueToOutOfWorkHours() {
         LocalTime now = LocalTime.now();
         if (now.isBefore(startHour)) {
             oneLineLogger.print("Skip, not yet in work hours:", ".");

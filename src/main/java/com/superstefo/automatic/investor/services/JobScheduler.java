@@ -26,13 +26,14 @@ public class JobScheduler {
 
     @Scheduled(initialDelay = 1)
     public void init() {
-        updateFreeInvestorsMoneyFromServer();
+        restAPIService.getMainInfoAsync()
+                .thenAccept(mainInfo -> walletService.setInvestorsFreeMoney(mainInfo.getAvailableMoney()));
         startingProcedure.start();
     }
 
     @Scheduled(initialDelay = 100, fixedRateString = "${pollFrequency}")
     public void run() {
-        if (cycleDelayService.isToWaitMore()) {
+        if (cycleDelayService.isToWaitDueToPostponing() || cycleDelayService.isToWaitDueToOutOfWorkHours()) {
             return;
         }
         switch (nextProcedureSelector.getNextProcedureToRun()) {
@@ -45,6 +46,9 @@ public class JobScheduler {
 
     @Scheduled(initialDelay = 10000, fixedRate = INVESTOR_BALANCE_UPDATE_INTERVAL_SECONDS)
     private void updateFreeInvestorsMoneyFromServer() {
+        if (cycleDelayService.isToWaitDueToOutOfWorkHours()) {
+            return;
+        }
         restAPIService.getMainInfoAsync()
                 .thenAccept(mainInfo -> walletService.setInvestorsFreeMoney(mainInfo.getAvailableMoney()));
     }
