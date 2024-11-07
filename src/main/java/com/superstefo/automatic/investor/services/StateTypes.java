@@ -18,7 +18,6 @@ public enum StateTypes {
     StateTypes(int code, String info) {
         this.code = code;
         this.info = info;
-
     }
 
     public static StateTypes fromErrorMessage(RuntimeException e) {

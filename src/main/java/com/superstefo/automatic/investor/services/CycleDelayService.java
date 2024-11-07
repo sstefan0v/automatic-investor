@@ -9,6 +9,9 @@ import java.time.LocalTime;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.superstefo.automatic.investor.config.Constants.SHUT_DOWN_AFTER_WORK_HOURS;
+import static com.superstefo.automatic.investor.config.Constants.SKIP_RUN_BEFORE_WORK_HOURS;
+
 @Service
 @Slf4j
 public class CycleDelayService {
@@ -39,17 +42,17 @@ public class CycleDelayService {
     public boolean isToWaitDueToOutOfWorkHours() {
         LocalTime now = LocalTime.now();
         if (now.isBefore(startHour)) {
-            oneLineLogger.print("Skip, not yet in work hours:", ".");
-            log.debug("Skipping run, not yet in work hours ");
+            log.debug(SKIP_RUN_BEFORE_WORK_HOURS);
+            oneLineLogger.print(SKIP_RUN_BEFORE_WORK_HOURS, ".");
             return true;
         } else if (now.isAfter(finishHour)) {
-            log.info("App will shut down, since it is after working hours... ");
+            log.info(SHUT_DOWN_AFTER_WORK_HOURS);
             System.exit(0);
         }
         return false;
     }
 
-    public void postpone(int seconds, String text) {
+    private void postpone(int seconds, String text) {
         lock.lock();
         try {
             futureInstant = System.currentTimeMillis() + (seconds * 1000L);
