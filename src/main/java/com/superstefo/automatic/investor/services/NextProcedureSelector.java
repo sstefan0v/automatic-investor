@@ -9,7 +9,7 @@ import static com.superstefo.automatic.investor.services.ProcedureTypes.*;
 @Service
 @Getter
 @Slf4j
-public class NextProcedureSelector{
+public class NextProcedureSelector {
     private volatile ProcedureTypes nextProcedureToRun = STARTING;
 
     private void setProcedureToRunNext(ProcedureTypes procedureType) {
