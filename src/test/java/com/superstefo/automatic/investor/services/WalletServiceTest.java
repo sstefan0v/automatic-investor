@@ -34,75 +34,75 @@ class WalletServiceTest {
 
     @Test
     void run1() {
-        setup(900d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(15.2));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(15.2)));
+        setup("900");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("15.2"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("15.2")));
     }
 
     @Test
     void run2() {
-        setup(900d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(605.2));
+        setup("900");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("605.2"));
         assertThat(approvedMoney, equalTo(MAX_INVEST_SUM));
     }
 
     @Test
     void run3() {
-        setup(11d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(605.2));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(11)));
+        setup("11");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("605.2"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("11")));
     }
 
     @Test
     void run4() {
-        setup(9.8d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(15.2));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(0)));
+        setup("9.8");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("15.2"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("0")));
     }
 
     @Test
     void run5() {
-        setup(11d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(15.2));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(0)));
+        setup("11");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("15.2"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("0")));
     }
 
     @Test
     void run6() {
-        setup(11d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(20));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(10)));
+        setup("11");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("20"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("10")));
     }
 
     @Test
     void run7() {
-        setup(16d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(13));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(13)));
+        setup("16");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("13"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("13")));
     }
 
     @Test
     void run8() {
-        setup(190d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(199));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(199).subtract(MINIMUM_INVESTMENT)));
+        setup("190");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("199"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("199").subtract(MINIMUM_INVESTMENT)));
     }
 
     @Test
     void run9() {
-        setup(21d);
-        BigDecimal approvedMoney = walletService.approveLoanMoney(BigDecimal.valueOf(20));
-        assertThat(approvedMoney, equalTo(BigDecimal.valueOf(20)));
+        setup("21");
+        BigDecimal approvedMoney = walletService.approveLoanMoney(new BigDecimal("20"));
+        assertThat(approvedMoney, equalTo(new BigDecimal("20")));
     }
 
     @Test
     void willPullMoneyCorrectly() {
-        setup(21d);
+        setup("21");
         walletService.pull(walletService.approveLoanMoney(BigDecimal.TEN));
-        assertThat(walletService.getInvestorsFreeMoney(), equalTo(BigDecimal.valueOf(11)));
+        assertThat(walletService.getInvestorsFreeMoney(), equalTo(new BigDecimal("11")));
     }
 
-    void setup(double investorsFreeMoney) {
+    void setup(String investorsFreeMoney) {
         walletService.setInvestorsFreeMoney(new BigDecimal(investorsFreeMoney));
     }
 }
