@@ -87,7 +87,7 @@ public class FindLoansProcedure implements Startable {
                 .thenAccept(actDependingOnInvestCallResult(amountToInvest, loan));
     }
 
-    private Consumer<StateTypes> actDependingOnInvestCallResult(BigDecimal amountToInvest, Loan loan) {
+    private Consumer<InvestmentResult> actDependingOnInvestCallResult(BigDecimal amountToInvest, Loan loan) {
         return (state) -> {
             log.debug("Investment call result={} for loanId={}", state, loan.getLoanId());
             switch (state) {

@@ -3,7 +3,7 @@ package com.superstefo.automatic.investor.services.procedures;
 import com.superstefo.automatic.investor.config.InvestProps;
 import com.superstefo.automatic.investor.services.JobScheduler;
 import com.superstefo.automatic.investor.services.NextProcedureSelector;
-import com.superstefo.automatic.investor.services.StateTypes;
+import com.superstefo.automatic.investor.services.InvestmentResult;
 import com.superstefo.automatic.investor.services.WalletService;
 import com.superstefo.automatic.investor.services.rest.RestAPIService;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.AllLoans;
@@ -65,7 +65,7 @@ class FindLoansProcedureTest {
         when(restAPIServiceMock.getAvailableLoans())
                 .thenReturn(getAllLoans(newLoan(1234)));
         when(restAPIServiceMock.invest(any(), any()))
-                .thenReturn((CompletableFuture<StateTypes>) CompletableFuture.completedStage(StateTypes.OK));
+                .thenReturn((CompletableFuture<InvestmentResult>) CompletableFuture.completedStage(InvestmentResult.OK));
 
         findLoansProcedure.start();
 
@@ -86,8 +86,8 @@ class FindLoansProcedureTest {
                 .thenReturn(getAllLoans(newLoan(1234)))
                 .thenReturn(getAllLoans(newLoan(5678)));
         when(restAPIServiceMock.invest(any(), any()))
-                .thenReturn((CompletableFuture<StateTypes>) CompletableFuture.completedStage(StateTypes.OK))
-                .thenReturn((CompletableFuture<StateTypes>) CompletableFuture.completedStage(StateTypes.TOO_MANY_REQUESTS));
+                .thenReturn((CompletableFuture<InvestmentResult>) CompletableFuture.completedStage(InvestmentResult.OK))
+                .thenReturn((CompletableFuture<InvestmentResult>) CompletableFuture.completedStage(InvestmentResult.TOO_MANY_REQUESTS));
 
         simulateScheduledStart(2);
 
@@ -104,8 +104,8 @@ class FindLoansProcedureTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = StateTypes.class, names = {"OK", "SERVER_ERROR", "LOAN_LESS_THAN_MIN", "LOAN_SOLD"})
-    void willInvestJustOnceIfResultIs(StateTypes types) {
+    @EnumSource(value = InvestmentResult.class, names = {"OK", "SERVER_ERROR", "LOAN_LESS_THAN_MIN", "LOAN_SOLD"})
+    void willInvestJustOnceIfResultIs(InvestmentResult types) {
         when(walletServiceMock.approveLoanMoney(any()))
                 .thenReturn(BigDecimal.TEN);
         when(walletServiceMock.getInvestorsFreeMoney())
@@ -114,7 +114,7 @@ class FindLoansProcedureTest {
                 .thenReturn(getAllLoans(newLoan(1234)))
                 .thenReturn(getAllLoans(newLoan(1234)));
         when(restAPIServiceMock.invest(any(), any()))
-                .thenReturn((CompletableFuture<StateTypes>) CompletableFuture.completedStage(types));
+                .thenReturn((CompletableFuture<InvestmentResult>) CompletableFuture.completedStage(types));
 
         simulateScheduledStart(3);
 

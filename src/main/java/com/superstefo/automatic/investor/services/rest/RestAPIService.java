@@ -6,7 +6,7 @@ import com.superstefo.automatic.investor.services.rest.model.get.loans.AllLoans;
 import com.superstefo.automatic.investor.services.rest.model.get.loans.Loan;
 import com.superstefo.automatic.investor.services.rest.model.invest.Invest;
 import com.superstefo.automatic.investor.services.rest.model.main.info.MainInfo;
-import com.superstefo.automatic.investor.services.StateTypes;
+import com.superstefo.automatic.investor.services.InvestmentResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
@@ -44,11 +44,11 @@ public final class RestAPIService extends RestAPIConnector {
         this.investingUserAuthHeaders = getAuthHeaders(investProps, "Bearer " + authToken);
     }
 
-    public CompletableFuture<StateTypes> invest(BigDecimal amountToInvest, Loan loan) {
+    public CompletableFuture<InvestmentResult> invest(BigDecimal amountToInvest, Loan loan) {
         return CompletableFuture.supplyAsync(() -> doInvest(amountToInvest, loan), executor);
     }
 
-    private StateTypes doInvest(BigDecimal amount, Loan loan) {
+    private InvestmentResult doInvest(BigDecimal amount, Loan loan) {
         log.info("Investing in loanId={}; availableToInvest={}, myAmount={}",
                 loan.getLoanId(), loan.getAvailableToInvest(), amount);
 
@@ -62,20 +62,20 @@ public final class RestAPIService extends RestAPIConnector {
             return getResultStateBasedOnException(exception, loan);
         }
         log.info("{} EUR invested in loan {};", amount, loan.getLoanId());
-        return StateTypes.OK;
+        return InvestmentResult.OK;
     }
 
-    private StateTypes getResultStateBasedOnException(RuntimeException exc, Loan loan) {
+    private InvestmentResult getResultStateBasedOnException(RuntimeException exc, Loan loan) {
         return
                 switch (exc) {
-                    case HttpClientErrorException.TooManyRequests _ -> StateTypes.TOO_MANY_REQUESTS;
+                    case HttpClientErrorException.TooManyRequests _ -> InvestmentResult.TOO_MANY_REQUESTS;
                     case HttpClientErrorException.BadRequest e -> {
                         log.error("LoanId={} returned BadRequest Exception: {}", loan.getLoanId(), e.getMessage());
-                        yield StateTypes.fromErrorMessage(e);
+                        yield InvestmentResult.fromErrorMessage(e);
                     }
                     case HttpServerErrorException e -> {
                         log.error("LoanId={} returned InternalServerError Exception: {}", loan.getLoanId(), e.getMessage());
-                        yield StateTypes.SERVER_ERROR;
+                        yield InvestmentResult.SERVER_ERROR;
                     }
                     default -> throw exc;
                 };

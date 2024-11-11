@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import static com.superstefo.automatic.investor.config.Constants.MINIMUM_INVESTMENT;
-import static com.superstefo.automatic.investor.services.StateTypes.TOO_MANY_REQUESTS;
+import static com.superstefo.automatic.investor.services.InvestmentResult.TOO_MANY_REQUESTS;
 
 @Component
 @Slf4j
