@@ -81,6 +81,7 @@ public class FindLoansProcedure implements Startable {
             log.info("Will not invest in loan={} as investment amount is less than MIN;", loan.getLoanId());
             return;
         }
+        triedLoans.put(loan.getLoanId(), loan);
         restAPIService
                 .invest(amountToInvest, loan)
                 .thenAccept(actDependingOnInvestCallResult(amountToInvest, loan));
@@ -90,11 +91,8 @@ public class FindLoansProcedure implements Startable {
         return (state) -> {
             log.debug("Investment call result={} for loanId={}", state, loan.getLoanId());
             switch (state) {
-                case OK -> {
-                    triedLoans.put(loan.getLoanId(), loan);
-                    wallet.pull(amountToInvest);
-                }
-                case LOAN_SOLD, LOAN_LESS_THAN_MIN, SERVER_ERROR -> triedLoans.put(loan.getLoanId(), loan);
+                case OK -> wallet.pull(amountToInvest);
+                case LOAN_SOLD, LOAN_LESS_THAN_MIN, SERVER_ERROR -> log.warn("Error for loanId={}", loan.getLoanId());
                 case LOW_BALANCE -> nextProcedureSelector.lowInvestorBalanceProcedure();
                 case TOO_MANY_REQUESTS -> nextProcedureSelector.tooManyRequestsProcedure();
                 default -> log.warn("Unhandled stateType: {}", state);
