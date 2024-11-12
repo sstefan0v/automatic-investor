@@ -90,14 +90,14 @@ public class FindLoansProcedure implements Startable {
     }
 
     private Consumer<InvestmentResult> actDependingOnInvestCallResult(BigDecimal amountToInvest, Loan loan) {
-        return (state) -> {
-            log.debug("Investment call result={} for loanId={}", state, loan.getLoanId());
-            switch (state) {
+        return (result) -> {
+            log.debug("Investment call result={} for loanId={}", result, loan.getLoanId());
+            switch (result) {
                 case OK -> wallet.pull(amountToInvest);
                 case LOAN_SOLD, LOAN_LESS_THAN_MIN, SERVER_ERROR -> log.warn("Error for loanId={}", loan.getLoanId());
                 case LOW_BALANCE -> nextProcedureSelector.lowInvestorBalanceProcedure();
                 case TOO_MANY_REQUESTS -> nextProcedureSelector.tooManyRequestsProcedure();
-                default -> log.warn("Unhandled stateType: {}", state);
+                default -> log.warn("Unhandled result: {}", result);
             }
         };
     }
