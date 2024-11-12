@@ -47,13 +47,15 @@ public class InvestorService {
         this.jobScheduler = jobScheduler;
         this.wallet = wallet;
 
-        jobScheduler.setRunProcedure(lowInvestorBalanceProcedure());
+        jobScheduler.setRunProcedure(findLoansProcedure());
     }
 
     private Consumer<Void> findLoansProcedure() {
         return (_) -> {
             if (wallet.getInvestorsFreeMoney().compareTo(MINIMUM_INVESTMENT) < 0) {
                 jobScheduler.setRunProcedure(lowInvestorBalanceProcedure());
+            } else if (wallet.getInvestorsFreeMoney().compareTo(investProps.getHowMuchMoneyToInvest()) < 0) {
+                wallet.updateInvestorsFreeMoneyFromServer();
             }
             investInLoans(restAPIService.getAvailableLoans());
         };
@@ -85,7 +87,7 @@ public class InvestorService {
             return;
         }
 
-        log.debug("Will start investing in loans:");
+        log.debug("Loans found for investment:");
         allLoans.getData().forEach(loan -> log.info("Loan {}, from {}, at {}%", loan.getLoanId(), loan.getCountry(),
                 loan.getInterestRate()));
 
@@ -129,12 +131,13 @@ public class InvestorService {
                     wallet.pull(amountToInvest);
                     log.debug("Invested in loan. Will be skipped next time, loanId={}", loan.getLoanId());
                 }
-                case LOAN_SOLD -> {
+                case LOAN_SOLD, LOAN_LESS_THAN_MIN -> {
                     triedLoans.put(loan.getLoanId(), loan);
                     log.debug("Loan will be skipped next time, loanId={}", loan.getLoanId());
                 }
-                case LOW_BALANCE -> wallet.updateInvestorsFreeMoneyFromServer();
-
+                case LOW_BALANCE -> {
+                    //wallet.updateInvestorsFreeMoneyFromServer();
+                }
                 case TOO_MANY_REQUESTS -> jobScheduler.setRunProcedure(tooManyRequestsProcedure());
                 default -> log.warn("Unhandled stateType: {}", state);
             }

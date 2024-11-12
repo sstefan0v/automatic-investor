@@ -62,11 +62,11 @@ public final class RestAPIService extends RestAPIConnector {
                 switch (exc) {
                     case HttpClientErrorException.TooManyRequests _ -> StateTypes.TOO_MANY_REQUESTS;
                     case HttpClientErrorException.BadRequest e -> {
-                        log.error("Loan={} returned BadRequest Exception: {}", loan.getLoanId(), e.getMessage());
+                        log.error("LoanId={} returned BadRequest Exception: {}", loan.getLoanId(), e.getMessage());
                         yield StateTypes.fromErrorMessage(e);
                     }
                     case HttpServerErrorException e -> {
-                        log.error("InternalServerError Exception: {}", e.getMessage());
+                        log.error("LoanId={} returned InternalServerError Exception: {}", loan.getLoanId(), e.getMessage());
                         yield StateTypes.SERVER_ERROR;
                     }
                     default -> throw exc;
